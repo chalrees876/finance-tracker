@@ -32,17 +32,23 @@ def home(request):
     if request.user.is_authenticated:
         return redirect("dashboard")
 
+    signup_form = SignUpForm()
+    login_form = AuthenticationForm()
+    signup_success = False
+
     if request.method == "POST":
         form_type = request.POST.get('form_type')
 
         if form_type == 'signup':
-            form = SignUpForm(request.POST)
-            if form.is_valid():
-                user = form.save()
+            signup_form = SignUpForm(request.POST)
+            if signup_form.is_valid():
+                user = signup_form.save()
+                # Log the user in after signup
                 login(request, user)
-                messages.success(request, f"Welcome {user.username}! Your account has been created.")
+                messages.success(request, f"Welcome {user.username}! Your account has been created successfully.")
                 return redirect("dashboard")
-            # If form is invalid, we'll return with the form errors
+            else:
+                messages.error(request, "Please correct the errors below.")
 
         elif form_type == 'login':
             login_form = AuthenticationForm(request, data=request.POST)
@@ -53,21 +59,17 @@ def home(request):
                 if user is not None:
                     login(request, user)
                     messages.success(request, f"Welcome back, {username}!")
-                    return redirect("dashboard")
+                    next_url = request.GET.get('next', 'dashboard')
+                    return redirect(next_url)
             else:
                 messages.error(request, "Invalid username or password.")
 
-    else:
-        form = SignUpForm()
-        login_form = AuthenticationForm()
-
     return render(request, "tracker/home.html", {
-        "form": form,
-        "login_form": login_form
+        "signup_form": signup_form,
+        "login_form": login_form,
     })
 
 
-# Add login view for standalone login page
 def login_view(request):
     if request.user.is_authenticated:
         return redirect("dashboard")
@@ -233,14 +235,6 @@ def parse_month_param(request):
         sel = first_of_month(date.today())
         return sel, sel.strftime("%Y-%m")
 
-
-# --- public / landing ---
-def home(request):
-    if request.user.is_authenticated:
-        return redirect("dashboard")
-    return render(request, "tracker/home.html")
-
-
 # --- dashboard (YNAB-style) ---
 @login_required
 def dashboard(request):
@@ -322,9 +316,6 @@ def dashboard(request):
         "groups": groups_ctx,
     }
     return render(request, "tracker/dashboard.html", ctx)
-
-
-# REMOVED: Duplicate transactions and categories views
 
 @login_required
 @require_POST

@@ -1,37 +1,414 @@
-{% extends "tracker/base.html" %}
-{% block title %}Sign Up{% endblock %}
+{% extends 'tracker/base.html' %}
 
 {% block content %}
-<div class="max-w-md mx-auto bg-white shadow p-6 rounded mt-10">
-  <h2 class="text-2xl font-semibold mb-4 text-center">Create Your Account</h2>
+<div class="hero-section">
+    <div class="hero-content">
+        <div class="hero-text">
+            <h1>Take Control of Your Money</h1>
+            <p class="hero-subtitle">Budget Tracker helps you manage your finances with zero-based budgeting, track your spending, and achieve your financial goals.</p>
 
-  <form method="post" action="{% url 'signup' %}">
-    {% csrf_token %}
-    {{ form.non_field_errors }}
-    <div class="space-y-3">
-      {% for field in form %}
-        <div>
-          <label class="block text-sm font-medium mb-1">{{ field.label }}</label>
-          {{ field }}
-          {% if field.help_text %}
-            <p class="text-xs text-gray-500">{{ field.help_text }}</p>
-          {% endif %}
-          {% for error in field.errors %}
-            <p class="text-sm text-red-600">{{ error }}</p>
-          {% endfor %}
+            <div class="hero-features">
+                <div class="feature">
+                    <span class="feature-icon">💰</span>
+                    <span class="feature-text">Zero-Based Budgeting</span>
+                </div>
+                <div class="feature">
+                    <span class="feature-icon">📊</span>
+                    <span class="feature-text">Real-Time Reports</span>
+                </div>
+                <div class="feature">
+                    <span class="feature-icon">🔄</span>
+                    <span class="feature-text">Rollover Balances</span>
+                </div>
+                <div class="feature">
+                    <span class="feature-icon">📱</span>
+                    <span class="feature-text">Any Device Access</span>
+                </div>
+            </div>
         </div>
-      {% endfor %}
+
+        <div class="auth-card">
+            {% if not user.is_authenticated %}
+                <div class="auth-tabs">
+                    <button class="tab-button active" onclick="showTab('signup')">Sign Up</button>
+                    <button class="tab-button" onclick="showTab('login')">Log In</button>
+                </div>
+
+                <!-- Sign Up Form -->
+                <div id="signup-tab" class="tab-content active">
+                    <h3>Start Your Financial Journey</h3>
+                    <form method="post" class="auth-form">
+                        {% csrf_token %}
+                        <input type="hidden" name="form_type" value="signup">
+
+                        <div class="form-group">
+                            <label class="form-label">Username *</label>
+                            <input type="text" name="username" class="form-control" required
+                                   placeholder="Choose a username"
+                                   value="{{ signup_form.username.value|default:'' }}">
+                            {% if signup_form.username.errors %}
+                                {% for error in signup_form.username.errors %}
+                                <div class="error">{{ error }}</div>
+                                {% endfor %}
+                            {% endif %}
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">Email *</label>
+                            <input type="email" name="email" class="form-control" required
+                                   placeholder="your@email.com"
+                                   value="{{ signup_form.email.value|default:'' }}">
+                            {% if signup_form.email.errors %}
+                                {% for error in signup_form.email.errors %}
+                                <div class="error">{{ error }}</div>
+                                {% endfor %}
+                            {% endif %}
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">Password *</label>
+                            <input type="password" name="password1" class="form-control" required
+                                   placeholder="Create a password">
+                            {% if signup_form.password1.errors %}
+                                {% for error in signup_form.password1.errors %}
+                                <div class="error">{{ error }}</div>
+                                {% endfor %}
+                            {% endif %}
+                            <small class="form-help">Your password must contain at least 8 characters.</small>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">Confirm Password *</label>
+                            <input type="password" name="password2" class="form-control" required
+                                   placeholder="Confirm your password">
+                            {% if signup_form.password2.errors %}
+                                {% for error in signup_form.password2.errors %}
+                                <div class="error">{{ error }}</div>
+                                {% endfor %}
+                            {% endif %}
+                        </div>
+
+                        <button type="submit" class="btn btn-primary btn-full">Create Account</button>
+                    </form>
+                </div>
+
+                <!-- Log In Form -->
+                <div id="login-tab" class="tab-content">
+                    <h3>Welcome Back</h3>
+                    <form method="post" class="auth-form">
+                        {% csrf_token %}
+                        <input type="hidden" name="form_type" value="login">
+
+                        <div class="form-group">
+                            <label class="form-label">Username</label>
+                            <input type="text" name="username" class="form-control" required
+                                   placeholder="Enter your username"
+                                   value="{{ login_form.username.value|default:'' }}">
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">Password</label>
+                            <input type="password" name="password" class="form-control" required
+                                   placeholder="Enter your password">
+                        </div>
+
+                        <button type="submit" class="btn btn-primary btn-full">Log In</button>
+
+                        <div class="auth-links">
+                            <p>New to Budget Tracker? <a href="#" onclick="showTab('signup')">Sign up here</a></p>
+                        </div>
+                    </form>
+                </div>
+            {% else %}
+                <div class="welcome-back">
+                    <h3>Welcome back, {{ user.username }}!</h3>
+                    <p>You're already logged in. Head to your dashboard to continue managing your budget.</p>
+                    <a href="{% url 'dashboard' %}" class="btn btn-primary btn-full">Go to Dashboard</a>
+                </div>
+            {% endif %}
+        </div>
     </div>
-
-    <button type="submit"
-      class="w-full mt-5 px-4 py-2 bg-green-600 hover:bg-green-700 text-white font-semibold rounded">
-      Sign Up
-    </button>
-  </form>
-
-  <p class="mt-4 text-sm text-center text-gray-700">
-    Already have an account?
-    <a href="{% url 'login' %}" class="text-blue-600 hover:underline">Log in</a>.
-  </p>
 </div>
+
+<div class="features-section">
+    <div class="container">
+        <h2 class="section-title">Why Choose Budget Tracker?</h2>
+        <div class="features-grid">
+            <div class="feature-card">
+                <div class="feature-card-icon">🎯</div>
+                <h4>Zero-Based Budgeting</h4>
+                <p>Give every dollar a job. Our zero-based approach ensures you're in complete control of your money.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-card-icon">📈</div>
+                <h4>Real-Time Insights</h4>
+                <p>See exactly where your money is going with up-to-the-minute transaction tracking and reports.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-card-icon">🛡️</div>
+                <h4>Secure & Private</h4>
+                <p>Your financial data is encrypted and never shared with third parties. Your privacy is our priority.</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+/* Hero Section */
+.hero-section {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    padding: 4rem 0;
+    min-height: 80vh;
+    display: flex;
+    align-items: center;
+}
+
+.hero-content {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 2rem;
+    display: grid;
+    grid-template-columns: 1fr 400px;
+    gap: 4rem;
+    align-items: center;
+}
+
+.hero-text h1 {
+    font-size: 3rem;
+    font-weight: 700;
+    margin-bottom: 1.5rem;
+    line-height: 1.2;
+}
+
+.hero-subtitle {
+    font-size: 1.25rem;
+    margin-bottom: 2rem;
+    opacity: 0.9;
+    line-height: 1.6;
+}
+
+.hero-features {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+}
+
+.feature {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin-bottom: 0.5rem;
+}
+
+.feature-icon {
+    font-size: 1.5rem;
+}
+
+.feature-text {
+    font-weight: 600;
+}
+
+/* Auth Card */
+.auth-card {
+    background: white;
+    border-radius: 12px;
+    padding: 2rem;
+    box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+    color: #333;
+}
+
+.auth-tabs {
+    display: flex;
+    margin-bottom: 1.5rem;
+    border-bottom: 2px solid #ecf0f1;
+}
+
+.tab-button {
+    flex: 1;
+    padding: 1rem;
+    background: none;
+    border: none;
+    font-weight: 600;
+    color: #7f8c8d;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.tab-button.active {
+    color: #3498db;
+    border-bottom: 3px solid #3498db;
+    margin-bottom: -2px;
+}
+
+.tab-content {
+    display: none;
+}
+
+.tab-content.active {
+    display: block;
+}
+
+.auth-card h3 {
+    text-align: center;
+    margin-bottom: 1.5rem;
+    color: #2c3e50;
+    font-weight: 600;
+}
+
+.btn-full {
+    width: 100%;
+    margin-top: 1rem;
+}
+
+.auth-links {
+    text-align: center;
+    margin-top: 1.5rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid #ecf0f1;
+}
+
+.auth-links a {
+    color: #3498db;
+    text-decoration: none;
+    font-weight: 600;
+}
+
+.auth-links a:hover {
+    text-decoration: underline;
+}
+
+.welcome-back {
+    text-align: center;
+}
+
+.welcome-back h3 {
+    color: #27ae60;
+    margin-bottom: 1rem;
+}
+
+/* Features Section */
+.features-section {
+    padding: 4rem 0;
+    background: #f8f9fa;
+}
+
+.section-title {
+    text-align: center;
+    font-size: 2.5rem;
+    margin-bottom: 3rem;
+    color: #2c3e50;
+    font-weight: 700;
+}
+
+.features-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 2rem;
+    max-width: 1000px;
+    margin: 0 auto;
+}
+
+.feature-card {
+    background: white;
+    padding: 2rem;
+    border-radius: 12px;
+    text-align: center;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+    transition: transform 0.3s ease;
+}
+
+.feature-card:hover {
+    transform: translateY(-5px);
+}
+
+.feature-card-icon {
+    font-size: 3rem;
+    margin-bottom: 1rem;
+}
+
+.feature-card h4 {
+    color: #2c3e50;
+    margin-bottom: 1rem;
+    font-size: 1.25rem;
+}
+
+.feature-card p {
+    color: #7f8c8d;
+    line-height: 1.6;
+}
+
+/* Form Help Text */
+.form-help {
+    color: #7f8c8d;
+    font-size: 0.875rem;
+    margin-top: 0.25rem;
+    display: block;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .hero-content {
+        grid-template-columns: 1fr;
+        gap: 2rem;
+    }
+
+    .hero-text h1 {
+        font-size: 2rem;
+    }
+
+    .hero-features {
+        grid-template-columns: 1fr;
+    }
+
+    .auth-card {
+        margin: 0 1rem;
+    }
+
+    .features-grid {
+        grid-template-columns: 1fr;
+        padding: 0 1rem;
+    }
+}
+</style>
+
+<script>
+function showTab(tabName) {
+    // Hide all tabs
+    document.querySelectorAll('.tab-content').forEach(tab => {
+        tab.classList.remove('active');
+    });
+    document.querySelectorAll('.tab-button').forEach(button => {
+        button.classList.remove('active');
+    });
+
+    // Show selected tab
+    document.getElementById(tabName + '-tab').classList.add('active');
+    event.currentTarget.classList.add('active');
+}
+
+// Set focus on first input when tab changes
+document.querySelectorAll('.tab-button').forEach(button => {
+    button.addEventListener('click', function() {
+        setTimeout(() => {
+            const activeTab = document.querySelector('.tab-content.active');
+            const firstInput = activeTab.querySelector('input');
+            if (firstInput) firstInput.focus();
+        }, 100);
+    });
+});
+
+// Auto-switch to login tab if there are login errors
+document.addEventListener('DOMContentLoaded', function() {
+    const loginErrors = document.querySelectorAll('#login-tab .error');
+    if (loginErrors.length > 0) {
+        showTab('login');
+    }
+
+    const signupErrors = document.querySelectorAll('#signup-tab .error');
+    if (signupErrors.length > 0) {
+        showTab('signup');
+    }
+});
+</script>
 {% endblock %}

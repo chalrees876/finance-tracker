@@ -14,9 +14,9 @@ def create_default_categories(sender, instance, created, **kwargs):
     if created:
         # Default Category Groups
         groups_data = [
-            {"name": "Immediate Obligations", "sort": 0},
-            {"name": "True Expenses", "sort": 1},
-            {"name": "Quality of Life", "sort": 2},
+            {"name": "Bills", "sort": 0},
+            {"name": "Needs", "sort": 1},
+            {"name": "Wants", "sort": 2},
             {"name": "Future Planning", "sort": 3},
         ]
 
@@ -28,20 +28,20 @@ def create_default_categories(sender, instance, created, **kwargs):
             )
 
             # Default Categories for each group
-            if group.name == "Immediate Obligations":
+            if group.name == "Needs":
                 categories = [
                     {"name": "Rent/Mortgage", "sort": 0},
                     {"name": "Utilities", "sort": 1},
                     {"name": "Groceries", "sort": 2},
                     {"name": "Transportation", "sort": 3},
                 ]
-            elif group.name == "True Expenses":
+            elif group.name == "Bills":
                 categories = [
                     {"name": "Insurance", "sort": 0},
                     {"name": "Healthcare", "sort": 1},
                     {"name": "Household Supplies", "sort": 2},
                 ]
-            elif group.name == "Quality of Life":
+            elif group.name == "Wants":
                 categories = [
                     {"name": "Dining Out", "sort": 0},
                     {"name": "Entertainment", "sort": 1},
