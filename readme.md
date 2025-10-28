@@ -36,7 +36,6 @@ python manage.py migrate
 python manage.py createsuperuser
 6. Run the dev server:
 python manage.py runserver
-7.
 7. Visit `http://localhost:8000` in your browser
 
 ### Default Setup
