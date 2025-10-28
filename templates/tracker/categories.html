@@ -1,0 +1,43 @@
+{% extends "tracker/base.html" %}
+{% block title %}Categories{% endblock %}
+{% block content %}
+  <h2 class="text-2xl font-bold mb-4">Categories</h2>
+
+  <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+    <div class="bg-white p-4 rounded shadow">
+      <h3 class="font-semibold mb-3">Add Category Group</h3>
+      <form method="post" action="{% url 'category_group_create' %}">
+        {% csrf_token %}
+        {{ group_form.as_p }}
+        <button class="px-3 py-1 bg-black text-white rounded">Add Group</button>
+      </form>
+    </div>
+
+    <div class="bg-white p-4 rounded shadow">
+      <h3 class="font-semibold mb-3">Add Category</h3>
+      <form method="post" action="{% url 'category_create' %}">
+        {% csrf_token %}
+        {{ cat_form.as_p }}
+        <button class="px-3 py-1 bg-black text-white rounded" type="submit">Add Category</button>
+      </form>
+    </div>
+  </div>
+
+  <div class="bg-white rounded shadow">
+    <div class="px-4 py-2 font-semibold border-b">Your Categories</div>
+    {% for g in groups %}
+      <div class="px-4 py-2 bg-gray-50 font-medium border-b">{{ g.name }}</div>
+      {% for c in g.categories.all %}
+        <div class="flex items-center justify-between px-4 py-2 border-b">
+          <span>{{ c.name }}</span>
+          <form method="post" action="{% url 'category_delete' c.id %}">
+            {% csrf_token %}
+            <button class="text-red-600 text-sm" onclick="return confirm('Delete this category?')">Delete</button>
+          </form>
+        </div>
+      {% empty %}
+        <div class="px-4 py-4 text-gray-600">No categories yet.</div>
+      {% endfor %}
+    {% endfor %}
+  </div>
+{% endblock %}

@@ -1,0 +1,65 @@
+{% extends 'tracker/base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="dashboard-header">
+    <div class="month-navigation">
+        <a href="?month={{ prev_month }}" class="month-nav-btn">← Previous Month</a>
+        <h2>{{ sel_month|date:"F Y" }}</h2>
+        <a href="?month={{ next_month }}" class="month-nav-btn">Next Month →</a>
+    </div>
+
+    <div class="summary-cards">
+        <div class="summary-card">
+            <h3>To Be Budgeted</h3>
+            <div class="amount {% if tbb > 0 %}amount-positive{% elif tbb < 0 %}amount-negative{% else %}amount-neutral{% endif %}">
+                ${{ tbb }}
+            </div>
+        </div>
+        <div class="summary-card">
+            <h3>Budgeted This Month</h3>
+            <div class="amount">${{ budgeted_this_month }}</div>
+        </div>
+        <div class="summary-card">
+            <h3>Activity This Month</h3>
+            <div class="amount {% if activity_this_month > 0 %}amount-positive{% elif activity_this_month < 0 %}amount-negative{% else %}amount-neutral{% endif %}">
+                ${{ activity_this_month }}
+            </div>
+        </div>
+        <div class="summary-card">
+            <h3>On Budget Balance</h3>
+            <div class="amount {% if on_budget_balance > 0 %}amount-positive{% elif on_budget_balance < 0 %}amount-negative{% else %}amount-neutral{% endif %}">
+                ${{ on_budget_balance }}
+            </div>
+        </div>
+    </div>
+</div>
+
+{% for group in groups %}
+<div class="budget-group">
+    <div class="budget-group-header">{{ group.name }}</div>
+    {% for row in group.rows %}
+    <div class="budget-category">
+        <div class="category-name">{{ row.category.name }}</div>
+        <form method="post" action="{% url 'budget_allocate' %}" style="display: contents;">
+            {% csrf_token %}
+            <input type="hidden" name="month" value="{{ month_value }}">
+            <input type="hidden" name="category_id" value="{{ row.category.id }}">
+            <input type="number"
+                   name="budgeted"
+                   value="{{ row.budgeted }}"
+                   step="0.01"
+                   class="budget-input"
+                   onchange="this.form.submit()">
+        </form>
+        <div class="amount {% if row.activity > 0 %}amount-positive{% elif row.activity < 0 %}amount-negative{% else %}amount-neutral{% endif %}">
+            ${{ row.activity }}
+        </div>
+        <div class="amount {% if row.available > 0 %}amount-positive{% elif row.available < 0 %}amount-negative{% else %}amount-neutral{% endif %}">
+            ${{ row.available }}
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% endfor %}
+{% endblock %}

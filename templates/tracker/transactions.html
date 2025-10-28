@@ -1,0 +1,334 @@
+{% extends 'tracker/base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="dashboard-header">
+    <h2>Transactions</h2>
+</div>
+
+<div class="transaction-form-container">
+    <h3>Add New Transaction</h3>
+    <form method="post" class="transaction-form">
+        {% csrf_token %}
+
+        <div class="form-grid">
+            <!-- Account Field -->
+            <div class="form-group">
+                <label class="form-label">Account *</label>
+                {{ form.account }}
+                {{ form.account_name }}
+                <datalist id="account-suggestions">
+                    {% for account in existing_accounts %}
+                    <option value="{{ account }}">
+                    {% endfor %}
+                </datalist>
+                {% if form.account_name.errors %}
+                <div class="error">{{ form.account_name.errors }}</div>
+                {% endif %}
+                <small class="form-help">Choose from list or type a new account</small>
+            </div>
+
+            <!-- Payee Field -->
+            <div class="form-group">
+                <label class="form-label">Payee *</label>
+                {{ form.payee }}
+                {{ form.payee_name }}
+                <datalist id="payee-suggestions">
+                    {% for payee in existing_payees %}
+                    <option value="{{ payee }}">
+                    {% endfor %}
+                </datalist>
+                {% if form.payee_name.errors %}
+                <div class="error">{{ form.payee_name.errors }}</div>
+                {% endif %}
+                <small class="form-help">Choose from list or type a new payee</small>
+            </div>
+
+            <!-- Category Field -->
+            <div class="form-group">
+                <label class="form-label">Category</label>
+                {{ form.category }}
+                {% if form.category.errors %}
+                <div class="error">{{ form.category.errors }}</div>
+                {% endif %}
+            </div>
+
+            <!-- Amount Field -->
+            <div class="form-group">
+                <label class="form-label">Amount *</label>
+                {{ form.amount }}
+                {% if form.amount.errors %}
+                <div class="error">{{ form.amount.errors }}</div>
+                {% endif %}
+                <small class="form-help">Use negative for expenses, positive for income</small>
+            </div>
+
+            <!-- Date Field -->
+            <div class="form-group">
+                <label class="form-label">Date *</label>
+                {{ form.date }}
+                {% if form.date.errors %}
+                <div class="error">{{ form.date.errors }}</div>
+                {% endif %}
+            </div>
+
+            <!-- Memo Field -->
+            <div class="form-group full-width">
+                <label class="form-label">Memo</label>
+                {{ form.memo }}
+                {% if form.memo.errors %}
+                <div class="error">{{ form.memo.errors }}</div>
+                {% endif %}
+            </div>
+
+            <!-- Cleared Checkbox -->
+            <div class="form-group">
+                <label class="checkbox-label">
+                    {{ form.cleared }} Mark as cleared
+                </label>
+            </div>
+        </div>
+
+        <button type="submit" class="btn btn-primary">Add Transaction</button>
+    </form>
+</div>
+
+<!-- Transactions List -->
+<div class="transaction-list-container">
+    <h3>Recent Transactions (Last 200)</h3>
+
+    {% if transactions %}
+    <div class="transaction-table">
+        <table>
+            <thead>
+                <tr>
+                    <th>Date</th>
+                    <th>Account</th>
+                    <th>Payee</th>
+                    <th>Category</th>
+                    <th>Memo</th>
+                    <th class="text-right">Amount</th>
+                    <th>Status</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for transaction in transactions %}
+                <tr class="{% if transaction.cleared %}cleared{% else %}pending{% endif %}">
+                    <td>{{ transaction.date|date:"M j, Y" }}</td>
+                    <td>{{ transaction.account.name }}</td>
+                    <td>{{ transaction.payee.name|default:"-" }}</td>
+                    <td>{{ transaction.category.name|default:"Uncategorized" }}</td>
+                    <td>{{ transaction.memo|default:"-" }}</td>
+                    <td class="amount {% if transaction.amount > 0 %}amount-positive{% else %}amount-negative{% endif %}">
+                        ${{ transaction.amount }}
+                    </td>
+                    <td>
+                        <span class="status-badge {% if transaction.cleared %}status-cleared{% else %}status-pending{% endif %}">
+                            {% if transaction.cleared %}Cleared{% else %}Pending{% endif %}
+                        </span>
+                    </td>
+                    <td>
+                        <button class="btn-small" onclick="editTransaction({{ transaction.id }})">Edit</button>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% else %}
+    <div class="empty-state">
+        <p>No transactions yet. Add your first transaction above!</p>
+    </div>
+    {% endif %}
+</div>
+
+<style>
+/* Additional CSS for transactions page */
+.transaction-form-container {
+    background: white;
+    padding: 2rem;
+    border-radius: 10px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    margin-bottom: 2rem;
+}
+
+.form-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.5rem;
+    margin-bottom: 1.5rem;
+}
+
+.form-group.full-width {
+    grid-column: 1 / -1;
+}
+
+.form-help {
+    color: #7f8c8d;
+    font-size: 0.875rem;
+    margin-top: 0.25rem;
+    display: block;
+}
+
+.checkbox-label {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    cursor: pointer;
+    margin-top: 1.5rem;
+}
+
+.checkbox-label input[type="checkbox"] {
+    width: auto;
+}
+
+.error {
+    color: #e74c3c;
+    font-size: 0.875rem;
+    margin-top: 0.25rem;
+}
+
+.transaction-list-container {
+    background: white;
+    padding: 2rem;
+    border-radius: 10px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+}
+
+.transaction-table table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.transaction-table th {
+    background: #34495e;
+    color: white;
+    padding: 1rem;
+    text-align: left;
+    font-weight: 600;
+}
+
+.transaction-table th.text-right {
+    text-align: right;
+}
+
+.transaction-table td {
+    padding: 1rem;
+    border-bottom: 1px solid #ecf0f1;
+}
+
+.transaction-table tr:hover {
+    background-color: #f8f9fa;
+}
+
+.transaction-table tr.cleared {
+    background-color: #f8fff8;
+}
+
+.status-badge {
+    padding: 0.25rem 0.75rem;
+    border-radius: 12px;
+    font-size: 0.875rem;
+    font-weight: 600;
+}
+
+.status-cleared {
+    background-color: #d4edda;
+    color: #155724;
+}
+
+.status-pending {
+    background-color: #fff3cd;
+    color: #856404;
+}
+
+.btn-small {
+    padding: 0.25rem 0.75rem;
+    background: #3498db;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 0.875rem;
+    transition: background-color 0.3s;
+}
+
+.btn-small:hover {
+    background: #2980b9;
+}
+
+.empty-state {
+    text-align: center;
+    padding: 3rem;
+    color: #7f8c8d;
+}
+
+.empty-state p {
+    font-size: 1.1rem;
+}
+
+/* Hide the original dropdowns for account and payee */
+#id_account, #id_payee {
+    display: none;
+}
+
+/* Form input styling */
+.form-control, .budget-input, input[type="text"], input[type="number"], input[type="date"], select, textarea {
+    width: 100%;
+    padding: 0.75rem;
+    border: 2px solid #bdc3c7;
+    border-radius: 6px;
+    font-size: 1rem;
+    transition: all 0.3s ease;
+    background-color: white;
+}
+
+.form-control:focus, .budget-input:focus, input[type="text"]:focus,
+input[type="number"]:focus, input[type="date"]:focus, select:focus, textarea:focus {
+    outline: none;
+    border-color: #3498db;
+    box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.1);
+    background-color: #fff;
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+    .form-grid {
+        grid-template-columns: 1fr;
+        gap: 1rem;
+    }
+
+    .transaction-table {
+        overflow-x: auto;
+    }
+
+    .transaction-table table {
+        min-width: 800px;
+    }
+}
+</style>
+
+<script>
+// JavaScript for enhanced functionality
+document.addEventListener('DOMContentLoaded', function() {
+    // Auto-focus on the first input field
+    const firstInput = document.querySelector('input[type="text"], input[type="number"]');
+    if (firstInput) {
+        firstInput.focus();
+    }
+
+    // Format amount field to show negative/positive hints
+    const amountField = document.querySelector('input[name="amount"]');
+    if (amountField) {
+        amountField.placeholder = "-100.00 for expense, 100.00 for income";
+    }
+});
+
+function editTransaction(transactionId) {
+    // Placeholder for edit functionality
+    alert('Edit functionality for transaction #' + transactionId + ' would go here.');
+    // In a real implementation, this would open a modal or redirect to an edit page
+}
+</script>
+{% endblock %}

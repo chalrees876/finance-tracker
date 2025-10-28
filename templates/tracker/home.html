@@ -1,0 +1,37 @@
+{% extends "tracker/base.html" %}
+{% block title %}Sign Up{% endblock %}
+
+{% block content %}
+<div class="max-w-md mx-auto bg-white shadow p-6 rounded mt-10">
+  <h2 class="text-2xl font-semibold mb-4 text-center">Create Your Account</h2>
+
+  <form method="post" action="{% url 'signup' %}">
+    {% csrf_token %}
+    {{ form.non_field_errors }}
+    <div class="space-y-3">
+      {% for field in form %}
+        <div>
+          <label class="block text-sm font-medium mb-1">{{ field.label }}</label>
+          {{ field }}
+          {% if field.help_text %}
+            <p class="text-xs text-gray-500">{{ field.help_text }}</p>
+          {% endif %}
+          {% for error in field.errors %}
+            <p class="text-sm text-red-600">{{ error }}</p>
+          {% endfor %}
+        </div>
+      {% endfor %}
+    </div>
+
+    <button type="submit"
+      class="w-full mt-5 px-4 py-2 bg-green-600 hover:bg-green-700 text-white font-semibold rounded">
+      Sign Up
+    </button>
+  </form>
+
+  <p class="mt-4 text-sm text-center text-gray-700">
+    Already have an account?
+    <a href="{% url 'login' %}" class="text-blue-600 hover:underline">Log in</a>.
+  </p>
+</div>
+{% endblock %}
