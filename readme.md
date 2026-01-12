@@ -74,17 +74,5 @@ This project uses:
 - HTML/CSS for the frontend
 - Django templates for rendering
 
-## Contributing
-
-1. Fork the repository
-2. Create a feature branch
-3. Make your changes
-4. Submit a pull request
-
-## License
-
-MIT License - see LICENSE file for details.
-
----
 
 For questions or support, please open an issue in the GitHub repository.
